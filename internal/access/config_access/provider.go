@@ -18,6 +18,13 @@ func Register(cfg *sdkconfig.SDKConfig) {
 
 	keys := normalizeKeys(cfg.APIKeys)
 	if len(keys) == 0 {
+		if requireAPIKey() {
+			sdkaccess.RegisterProvider(
+				sdkaccess.AccessProviderTypeConfigAPIKey,
+				newProvider(sdkaccess.DefaultAccessProviderName, nil),
+			)
+			return
+		}
 		sdkaccess.UnregisterProvider(sdkaccess.AccessProviderTypeConfigAPIKey)
 		return
 	}
