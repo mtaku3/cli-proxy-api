@@ -1,0 +1,47 @@
+name: mtaku3 upstream watch
+
+on:
+  schedule:
+    - cron: '0 21 * * *'
+  workflow_dispatch:
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Open issue for new upstream release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git fetch --no-tags https://github.com/router-for-me/CLIProxyAPI.git 'refs/tags/v*:refs/tags/v*'
+          current=$(git describe --tags --abbrev=0 --match 'v*' HEAD)
+          latest=$(gh api repos/router-for-me/CLIProxyAPI/releases/latest --jq .tag_name)
+          echo "current=$current latest=$latest"
+          if [ "$latest" = "$current" ] || git merge-base --is-ancestor "$latest" "$current"; then
+            exit 0
+          fi
+          title="Upstream release $latest available"
+          if [ -n "$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --search "\"$title\" in:title" --json number --jq '.[].number')" ]; then
+            exit 0
+          fi
+          gh issue create --repo "$GITHUB_REPOSITORY" --title "$title" --body "$(cat <<EOF
+          Based on \`$current\`. Review the changes first: https://github.com/router-for-me/CLIProxyAPI/compare/$current...$latest
+
+          \`\`\`sh
+          git fetch --no-tags https://github.com/router-for-me/CLIProxyAPI.git 'refs/tags/v*:refs/tags/v*'
+          git rebase --onto $latest $current
+          go test ./internal/access/... ./sdk/access/...
+          git push --force-with-lease origin mtaku3
+          \`\`\`
+
+          Close this issue once the build has pushed the new image.
+          EOF
+          )"
