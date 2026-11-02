@@ -4,7 +4,7 @@
 # renovate: datasource=github-releases depName=router-for-me/CLIProxyAPI
 ARG CLIPROXYAPI_VERSION=v8.0.51
 
-FROM golang:1.26-bookworm AS builder
+FROM golang:1.27-bookworm AS builder
 
 RUN apt-get update && apt-get install -y --no-install-recommends build-essential git && rm -rf /var/lib/apt/lists/*
 
