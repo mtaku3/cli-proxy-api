@@ -1,4 +1,4 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:recommended", "customManagers:dockerfileVersions"]
+  "extends": ["github>mtaku3/renovate-config"]
 }
