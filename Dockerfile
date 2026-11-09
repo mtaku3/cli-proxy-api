@@ -2,7 +2,7 @@
 # The build stages mirror upstream's own Dockerfile.
 
 # renovate: datasource=github-releases depName=router-for-me/CLIProxyAPI
-ARG CLIPROXYAPI_VERSION=v8.0.51
+ARG CLIPROXYAPI_VERSION=v8.0.61
 
 FROM golang:1.26-bookworm AS builder
 
